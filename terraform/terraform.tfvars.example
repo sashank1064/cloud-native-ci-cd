@@ -1,0 +1,14 @@
+project_name = "cloud-native-cicd"
+environment  = "dev"
+aws_region   = "us-east-1"
+cluster_name = "cicd-eks-cluster"
+
+desired_size   = 1
+min_size       = 1
+max_size       = 1
+instance_types = ["t3.small"]
+
+ecr_image_tag_mutability = "MUTABLE"
+
+alert_email                  = ""
+alb_load_balancer_arn_suffix = ""
