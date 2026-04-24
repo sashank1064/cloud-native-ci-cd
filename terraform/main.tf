@@ -34,8 +34,7 @@ module "eks" {
   instance_types      = var.instance_types
   cluster_role_arn    = module.iam.eks_cluster_role_arn
   node_role_arn       = module.iam.eks_node_role_arn
-
-  depends_on = [module.iam]
+  depends_on          = [module.iam]
 }
 
 module "alb_monitoring" {
