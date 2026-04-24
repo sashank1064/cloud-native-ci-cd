@@ -1,74 +1,72 @@
 # Project 2: Cloud Native CI/CD on AWS EKS
 
-A small end-to-end DevOps project that deploys a Flask service to Amazon EKS.
+Small EKS project for one Flask service.
 
-The goal was to keep the moving parts realistic but still readable: Terraform builds the AWS infrastructure, Docker packages the app, ECR stores the image, and Helm handles the Kubernetes release.
+I built this to keep the whole path in one repo: AWS infra, image build, ECR push, Helm deploy, and a CI check that catches the obvious stuff before anything gets merged.
 
-## What this project shows
+## What is here
 
-- Terraform modules for VPC, EKS, ECR, IAM, and basic ALB alerting.
-- A Dockerized Flask service with health and readiness endpoints.
-- Helm templates for deployment, service, probes, and ALB ingress.
-- GitHub Actions for tests, Terraform validation, Helm lint, and Docker build.
-- A local `Makefile` and deploy script for build, push, and deploy.
+- Terraform modules for VPC, EKS, ECR, IAM, and a small ALB alarm hook
+- Flask app with `/`, `/health`, and `/ready`
+- Dockerfile for the app
+- Helm chart for deployment, service, probes, and ALB ingress
+- GitHub Actions CI
+- Manual deploy workflow
+- Makefile plus `scripts/deploy.sh` for local runs
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    Dev[Local machine or CI] --> Docker[Docker build]
-    Docker --> ECR[Amazon ECR]
+    Dev[local or CI] --> Build[docker build]
+    Build --> ECR[ECR]
 
-    Dev --> TF[Terraform]
-    TF --> VPC[VPC with public and private subnets]
-    TF --> IAM[IAM roles and policies]
-    TF --> EKS[EKS cluster and node group]
-    TF --> SNS[SNS and CloudWatch alarm]
+    Dev --> TF[terraform apply]
+    TF --> VPC[VPC]
+    TF --> EKS[EKS]
+    TF --> IAM[IAM]
+    TF --> Alerts[CloudWatch/SNS]
 
-    ECR --> Helm[Helm deploy]
+    ECR --> Helm[helm upgrade]
     Helm --> Pods[user-service pods]
-    Pods --> SVC[Kubernetes service]
-    SVC --> Ingress[ALB ingress]
-    Ingress --> ALB[AWS Application Load Balancer]
-    ALB --> Users[Users]
+    Pods --> Svc[service]
+    Svc --> Ing[ALB ingress]
+    Ing --> ALB[ALB]
+    ALB --> Users[users]
 
     VPC --> EKS
     IAM --> EKS
     EKS --> Pods
 ```
 
-## Repository layout
+## Layout
 
 ```text
-.
-├── .github/workflows/       # CI and manual deploy workflow
-├── cicd/                    # Jenkins pipeline example
-├── helm/user-service/       # Helm chart
-├── microservices/user-service/
-│   ├── app.py
-│   ├── Dockerfile
-│   └── tests/
-├── scripts/deploy.sh
-├── terraform/               # AWS infrastructure
-├── Makefile
-└── README.md
+.github/workflows/       ci and manual deploy
+cicd/                    Jenkinsfile, mostly for comparison
+helm/user-service/       chart for the Flask service
+microservices/user-service/
+scripts/deploy.sh        local build/push/deploy script
+terraform/               AWS resources
+Makefile                 shortcuts I actually use
 ```
 
-## CI/CD flow
+## CI/CD
 
-The CI workflow runs on pull requests and pushes to `main`:
+CI runs on `main` and pull requests:
 
-1. Install Python dependencies.
-2. Run unit tests.
-3. Run `terraform init -backend=false`.
-4. Run `terraform fmt -check -recursive`.
-5. Run `terraform validate`.
-6. Run `helm lint`.
-7. Build the Docker image.
+```text
+pytest
+terraform init -backend=false
+terraform fmt -check -recursive
+terraform validate
+helm lint
+docker build
+```
 
-Deployment is manual. The deploy workflow takes an image tag, updates kubeconfig, and runs `helm upgrade --install`.
+Deploy is manual. It expects an image tag and runs Helm against the EKS cluster.
 
-Local deployment uses the same basic path:
+For local work:
 
 ```bash
 make build
@@ -76,7 +74,9 @@ make push
 make deploy
 ```
 
-## Tools needed
+## Setup
+
+Tools I used:
 
 ```bash
 aws --version
@@ -86,9 +86,7 @@ helm version
 kubectl version --client
 ```
 
-## Local config
-
-Copy the example files:
+Create local config files:
 
 ```bash
 cp .env.example .env
@@ -105,7 +103,7 @@ ECR_REPOSITORY=cloud-native-cicd/user-service
 IMAGE_TAG=latest
 ```
 
-For a small test run, use one worker node in `terraform/terraform.tfvars`:
+For a small test, keep the node group tiny:
 
 ```hcl
 desired_size   = 1
@@ -115,9 +113,9 @@ instance_types = ["t3.small"]
 alert_email    = ""
 ```
 
-EKS and NAT gateways cost money. Destroy the stack after testing.
+EKS and NAT gateways are billed. I destroy this after testing.
 
-## Deploy from scratch
+## Deploy
 
 Create the AWS resources:
 
@@ -164,7 +162,7 @@ make push
 make deploy
 ```
 
-Check the app:
+Check it:
 
 ```bash
 kubectl get pods
@@ -175,7 +173,7 @@ curl http://<alb-dns-name>/health
 
 ## Cleanup
 
-Delete the app first so the ALB can disappear cleanly:
+Remove the Helm release first so the ALB gets deleted:
 
 ```bash
 helm uninstall user-service --namespace default
@@ -189,7 +187,7 @@ helm uninstall aws-load-balancer-controller --namespace kube-system
 terraform -chdir=terraform destroy
 ```
 
-Check for leftovers:
+Quick leftover check:
 
 ```bash
 aws elbv2 describe-load-balancers --region "$AWS_REGION"

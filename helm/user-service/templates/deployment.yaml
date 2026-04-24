@@ -18,10 +18,6 @@ spec:
         runAsNonRoot: true
         runAsUser: 10001
         runAsGroup: 10001
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       containers:
         - name: user-service
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
