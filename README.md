@@ -1,10 +1,16 @@
 # Project 2: Cloud Native CI/CD on AWS EKS
 
-This is my second DevOps project. I built it to practice the full path from infrastructure to deployment instead of only showing separate Terraform or Docker examples.
+A small end-to-end DevOps project that deploys a Flask service to Amazon EKS.
 
-It runs a small Flask service on EKS. Terraform creates the AWS infrastructure, Docker builds the app image, ECR stores the image, and Helm deploys it into the cluster.
+The goal was to keep the moving parts realistic but still readable: Terraform builds the AWS infrastructure, Docker packages the app, ECR stores the image, and Helm handles the Kubernetes release.
 
-I kept the setup simple on purpose. There are still a few things I would tighten before calling it a real production setup, but the core workflow is here and works as a practical EKS deployment project.
+## What this project shows
+
+- Terraform modules for VPC, EKS, ECR, IAM, and basic ALB alerting.
+- A Dockerized Flask service with health and readiness endpoints.
+- Helm templates for deployment, service, probes, and ALB ingress.
+- GitHub Actions for tests, Terraform validation, Helm lint, and Docker build.
+- A local `Makefile` and deploy script for build, push, and deploy.
 
 ## Architecture
 
@@ -26,40 +32,49 @@ flowchart LR
     Ingress --> ALB[AWS Application Load Balancer]
     ALB --> Users[Users]
 
-    EKS --> Pods
     VPC --> EKS
     IAM --> EKS
+    EKS --> Pods
 ```
 
-## What is in the repo
+## Repository layout
 
-- `terraform/` creates the VPC, EKS cluster, node group, ECR repo, IAM roles, and a small alarm setup.
-- `microservices/user-service/` has the Flask app and Dockerfile.
-- `helm/user-service/` has the Kubernetes deployment, service, probes, and ingress.
-- `.github/workflows/` has CI checks and a manual deploy workflow.
-- `scripts/deploy.sh` builds the image, pushes it to ECR, and deploys with Helm.
-- `Makefile` wraps the common commands I kept typing.
+```text
+.
+├── .github/workflows/       # CI and manual deploy workflow
+├── cicd/                    # Jenkins pipeline example
+├── helm/user-service/       # Helm chart
+├── microservices/user-service/
+│   ├── app.py
+│   ├── Dockerfile
+│   └── tests/
+├── scripts/deploy.sh
+├── terraform/               # AWS infrastructure
+├── Makefile
+└── README.md
+```
 
 ## CI/CD flow
 
-The CI workflow is intentionally basic:
+The CI workflow runs on pull requests and pushes to `main`:
 
-- run Python tests
-- validate Terraform
-- lint the Helm chart
-- build the Docker image
+1. Install Python dependencies.
+2. Run unit tests.
+3. Run `terraform init -backend=false`.
+4. Run `terraform fmt -check -recursive`.
+5. Run `terraform validate`.
+6. Run `helm lint`.
+7. Build the Docker image.
 
-The deploy workflow is manual. I pass an image tag, GitHub Actions updates kubeconfig, and Helm updates the release.
+Deployment is manual. The deploy workflow takes an image tag, updates kubeconfig, and runs `helm upgrade --install`.
 
-For local testing I usually use:
+Local deployment uses the same basic path:
 
 ```bash
 make build
 make push
 make deploy
 ```
-
-There is also a Jenkinsfile in `cicd/`. I added it because I wanted to show the same rough flow in Jenkins, but GitHub Actions is the cleaner path for this repo.
 
 ## Tools needed
 
@@ -73,7 +88,7 @@ kubectl version --client
 
 ## Local config
 
-Copy the examples:
+Copy the example files:
 
 ```bash
 cp .env.example .env
@@ -90,7 +105,7 @@ ECR_REPOSITORY=cloud-native-cicd/user-service
 IMAGE_TAG=latest
 ```
 
-For a small test run, I use this in `terraform/terraform.tfvars`:
+For a small test run, use one worker node in `terraform/terraform.tfvars`:
 
 ```hcl
 desired_size   = 1
@@ -100,7 +115,7 @@ instance_types = ["t3.small"]
 alert_email    = ""
 ```
 
-EKS and NAT gateways are not free. I do not leave this running after testing.
+EKS and NAT gateways cost money. Destroy the stack after testing.
 
 ## Deploy from scratch
 
@@ -149,19 +164,13 @@ make push
 make deploy
 ```
 
-Check what happened:
+Check the app:
 
 ```bash
 kubectl get pods
 kubectl get svc
 kubectl get ingress
-```
-
-Once the ingress has an ALB address:
-
-```bash
 curl http://<alb-dns-name>/health
-curl http://<alb-dns-name>/
 ```
 
 ## Cleanup
@@ -180,7 +189,7 @@ helm uninstall aws-load-balancer-controller --namespace kube-system
 terraform -chdir=terraform destroy
 ```
 
-After destroy I usually check for leftovers:
+Check for leftovers:
 
 ```bash
 aws elbv2 describe-load-balancers --region "$AWS_REGION"
