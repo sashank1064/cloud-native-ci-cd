@@ -1,0 +1,48 @@
+replicaCount: 2
+
+image:
+  repository: user-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 5000
+
+ingress:
+  enabled: true
+  className: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+  hosts:
+    - host: ""
+      paths:
+        - path: /
+          pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+livenessProbe:
+  path: /health
+  initialDelaySeconds: 15
+  periodSeconds: 10
+
+readinessProbe:
+  path: /ready
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+env:
+  SERVICE_NAME: user-service
+  ENVIRONMENT: dev
+  VERSION: v1
