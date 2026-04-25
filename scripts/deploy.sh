@@ -21,6 +21,7 @@ HELM_RELEASE="${HELM_RELEASE:-user-service}"
 HELM_NAMESPACE="${HELM_NAMESPACE:-default}"
 CHART_PATH="${CHART_PATH:-${ROOT_DIR}/helm/user-service}"
 DOCKER_CONTEXT="${DOCKER_CONTEXT:-${ROOT_DIR}/microservices/user-service}"
+DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/amd64}"
 ENVIRONMENT="${ENVIRONMENT:-dev}"
 INGRESS_HOST="${INGRESS_HOST:-}"
 
@@ -34,7 +35,7 @@ IMAGE_REPOSITORY="${ECR_REGISTRY}/${ECR_REPOSITORY}"
 IMAGE_URI="${IMAGE_REPOSITORY}:${IMAGE_TAG}"
 
 echo "Building ${IMAGE_URI}"
-docker build -t "${IMAGE_URI}" "${DOCKER_CONTEXT}"
+docker build --platform "${DOCKER_PLATFORM}" -t "${IMAGE_URI}" "${DOCKER_CONTEXT}"
 
 echo "Logging in to ECR ${ECR_REGISTRY}"
 aws ecr get-login-password --region "${AWS_REGION}" \

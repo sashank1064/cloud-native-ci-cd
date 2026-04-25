@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 module "vpc" {
   source               = "./modules/vpc"
   project_name         = var.project_name
@@ -23,18 +25,20 @@ module "ecr" {
 }
 
 module "eks" {
-  source           = "./modules/eks"
-  project_name     = var.project_name
-  environment      = var.environment
-  cluster_name     = var.cluster_name
-  subnet_ids       = module.vpc.private_subnet_ids
-  desired_size     = var.desired_size
-  max_size         = var.max_size
-  min_size         = var.min_size
-  instance_types   = var.instance_types
-  cluster_role_arn = module.iam.eks_cluster_role_arn
-  node_role_arn    = module.iam.eks_node_role_arn
-  depends_on       = [module.iam]
+  source                                  = "./modules/eks"
+  project_name                            = var.project_name
+  environment                             = var.environment
+  cluster_name                            = var.cluster_name
+  subnet_ids                              = module.vpc.private_subnet_ids
+  desired_size                            = var.desired_size
+  max_size                                = var.max_size
+  min_size                                = var.min_size
+  instance_types                          = var.instance_types
+  cluster_role_arn                        = module.iam.eks_cluster_role_arn
+  admin_principal_arn                     = data.aws_caller_identity.current.arn
+  aws_load_balancer_controller_policy_arn = module.iam.aws_load_balancer_controller_policy_arn
+  node_role_arn                           = module.iam.eks_node_role_arn
+  depends_on                              = [module.iam]
 }
 
 module "alb_monitoring" {

@@ -87,6 +87,7 @@ resource "aws_iam_policy" "aws_load_balancer_controller" {
           "ec2:GetSecurityGroupsForVpc",
           "ec2:GetSubnetCidrReservations",
           "elasticloadbalancing:DescribeListeners",
+          "elasticloadbalancing:DescribeListenerAttributes",
           "elasticloadbalancing:DescribeLoadBalancerAttributes",
           "elasticloadbalancing:DescribeLoadBalancers",
           "elasticloadbalancing:DescribeRules",
