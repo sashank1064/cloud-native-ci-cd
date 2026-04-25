@@ -57,8 +57,8 @@ flowchart LR
     ECR --> Helm[helm upgrade]
     IRSA --> LBC[AWS Load Balancer Controller]
     Helm --> Pods[user-service pods]
-    Pods --> Svc[service]
-    Svc --> Ing[ALB ingress]
+    Pods --> Svc[ClusterIP Service]
+    Svc --> Ing[ALB Ingress]
     LBC --> Ing
     Ing --> ALB[ALB]
     ALB --> Users[users]
