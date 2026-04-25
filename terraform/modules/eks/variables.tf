@@ -34,6 +34,14 @@ variable "cluster_role_arn" {
   type = string
 }
 
+variable "admin_principal_arn" {
+  type = string
+}
+
+variable "aws_load_balancer_controller_policy_arn" {
+  type = string
+}
+
 variable "node_role_arn" {
   type = string
 }
