@@ -25,3 +25,7 @@ output "ecr_repository_urls" {
 output "sns_topic_arn" {
   value = module.alb_monitoring.sns_topic_arn
 }
+
+output "aws_load_balancer_controller_role_arn" {
+  value = module.eks.aws_load_balancer_controller_role_arn
+}

@@ -8,6 +8,7 @@ HELM_RELEASE ?= user-service
 HELM_NAMESPACE ?= default
 DOCKER_CONTEXT ?= microservices/user-service
 CHART_PATH ?= helm/user-service
+DOCKER_PLATFORM ?= linux/amd64
 
 ifneq (,$(wildcard .env))
 include .env
@@ -24,7 +25,7 @@ require-aws-account:
 	@test -n "$(AWS_ACCOUNT_ID)" || (echo "AWS_ACCOUNT_ID is required. Set it in .env or export it first." >&2; exit 1)
 
 build: require-aws-account
-	docker build -t $(IMAGE_URI) $(DOCKER_CONTEXT)
+	docker build --platform $(DOCKER_PLATFORM) -t $(IMAGE_URI) $(DOCKER_CONTEXT)
 
 push: require-aws-account
 	aws ecr get-login-password --region $(AWS_REGION) | docker login --username AWS --password-stdin $(ECR_REGISTRY)
