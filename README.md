@@ -16,6 +16,18 @@ The application itself is not just a blank health check. It includes a live prev
 
 When running locally or through the ALB, the root page shows the project name, service status, deployment metadata, project architecture, request flow, and useful endpoint links.
 
+### Live application page
+
+![Cloud Native CI/CD app overview](docs/screenshots/app-overview.png)
+
+### Architecture and request flow
+
+![Architecture and request flow](docs/screenshots/architecture-flow.png)
+
+### Deployment features
+
+![Deployment feature cards](docs/screenshots/deployment-features.png)
+
 ## What is here
 
 - Terraform modules for VPC, EKS, ECR, IAM, and a small ALB alarm hook
