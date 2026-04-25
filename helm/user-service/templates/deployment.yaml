@@ -30,12 +30,24 @@ spec:
           ports:
             - containerPort: {{ .Values.service.targetPort }}
           env:
+            - name: PROJECT_NAME
+              value: {{ .Values.env.PROJECT_NAME | quote }}
             - name: SERVICE_NAME
               value: {{ .Values.env.SERVICE_NAME | quote }}
             - name: ENVIRONMENT
               value: {{ .Values.env.ENVIRONMENT | quote }}
             - name: VERSION
               value: {{ .Values.env.VERSION | quote }}
+            - name: IMAGE_TAG
+              value: {{ .Values.env.IMAGE_TAG | quote }}
+            - name: GIT_COMMIT
+              value: {{ .Values.env.GIT_COMMIT | quote }}
+            - name: BUILD_DATE
+              value: {{ .Values.env.BUILD_DATE | quote }}
+            - name: AWS_REGION
+              value: {{ .Values.env.AWS_REGION | quote }}
+            - name: CLUSTER_NAME
+              value: {{ .Values.env.CLUSTER_NAME | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:

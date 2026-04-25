@@ -43,6 +43,12 @@ readinessProbe:
   periodSeconds: 10
 
 env:
+  PROJECT_NAME: Cloud Native CI/CD Project
   SERVICE_NAME: user-service
   ENVIRONMENT: dev
   VERSION: v1
+  IMAGE_TAG: v1
+  GIT_COMMIT: local
+  BUILD_DATE: local
+  AWS_REGION: local
+  CLUSTER_NAME: local

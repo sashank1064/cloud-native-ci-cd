@@ -1,0 +1,559 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ info.project }}</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --ink: #17202a;
+        --muted: #5c6975;
+        --line: #d9e0e7;
+        --panel: rgba(255, 255, 255, 0.88);
+        --green: #1d9a6c;
+        --blue: #2563eb;
+        --gold: #d78b16;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 18% 18%, rgba(37, 99, 235, 0.18), transparent 28%),
+          radial-gradient(circle at 82% 24%, rgba(29, 154, 108, 0.18), transparent 26%),
+          linear-gradient(135deg, #f7fbff 0%, #eef5f2 48%, #fff8eb 100%);
+        padding: 32px;
+      }
+
+      .page {
+        width: min(1120px, 100%);
+        margin: 0 auto;
+        display: grid;
+        gap: 24px;
+      }
+
+      main {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .hero,
+      .status,
+      .architecture,
+      .project {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        box-shadow: 0 24px 70px rgba(23, 32, 42, 0.12);
+        backdrop-filter: blur(16px);
+        border-radius: 8px;
+      }
+
+      .hero {
+        padding: 40px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .signal {
+        width: 92px;
+        height: 92px;
+        display: grid;
+        place-items: center;
+        margin-bottom: 28px;
+        position: relative;
+      }
+
+      .signal::before,
+      .signal::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border: 2px solid rgba(29, 154, 108, 0.42);
+        border-radius: 50%;
+        animation: pulse 2.4s ease-out infinite;
+      }
+
+      .signal::after {
+        animation-delay: 1.2s;
+      }
+
+      .core {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--green), var(--blue));
+        box-shadow: 0 0 0 10px rgba(37, 99, 235, 0.12);
+        animation: breathe 2.4s ease-in-out infinite;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(40px, 7vw, 72px);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--green);
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .subtitle {
+        margin: 22px 0 0;
+        max-width: 620px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.6;
+      }
+
+      .pipeline {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 32px;
+      }
+
+      .step {
+        border: 1px solid var(--line);
+        background: #ffffff;
+        border-radius: 999px;
+        padding: 10px 14px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 700;
+        animation: lift 3s ease-in-out infinite;
+      }
+
+      .step:nth-child(2) {
+        animation-delay: 0.25s;
+      }
+
+      .step:nth-child(3) {
+        animation-delay: 0.5s;
+      }
+
+      .step:nth-child(4) {
+        animation-delay: 0.75s;
+      }
+
+      .status {
+        padding: 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 22px;
+      }
+
+      .badge {
+        width: fit-content;
+        color: #075b3f;
+        background: rgba(29, 154, 108, 0.13);
+        border: 1px solid rgba(29, 154, 108, 0.24);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+
+      dl {
+        display: grid;
+        gap: 14px;
+        margin: 0;
+      }
+
+      .row {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 12px;
+      }
+
+      dt {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      dd {
+        margin: 5px 0 0;
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+
+      .links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .links a {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 8px;
+        color: var(--blue);
+        display: block;
+        font-weight: 800;
+        padding: 12px;
+        text-align: center;
+        text-decoration: none;
+      }
+
+      .links a:hover {
+        border-color: var(--blue);
+      }
+
+      .architecture,
+      .project {
+        padding: 32px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 0;
+      }
+
+      .section-copy {
+        margin: 10px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+        line-height: 1.55;
+        max-width: 820px;
+      }
+
+      .diagram {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 26px;
+      }
+
+      .node {
+        min-height: 136px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .node::after {
+        content: "";
+        position: absolute;
+        right: -18px;
+        top: 50%;
+        width: 36px;
+        height: 2px;
+        background: var(--blue);
+        transform: translateY(-50%);
+      }
+
+      .node:last-child::after {
+        display: none;
+      }
+
+      .node strong {
+        display: block;
+        font-size: 17px;
+        margin-bottom: 8px;
+      }
+
+      .node span {
+        color: var(--muted);
+        display: block;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .node:nth-child(1) {
+        border-top: 4px solid var(--gold);
+      }
+
+      .node:nth-child(2) {
+        border-top: 4px solid var(--blue);
+      }
+
+      .node:nth-child(3) {
+        border-top: 4px solid var(--green);
+      }
+
+      .node:nth-child(4) {
+        border-top: 4px solid #7c3aed;
+      }
+
+      .project-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 22px;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .flow-step {
+        min-height: 92px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 8px;
+        color: var(--ink);
+        font-size: 14px;
+        font-weight: 800;
+        line-height: 1.3;
+        padding: 14px;
+        position: relative;
+        text-align: center;
+      }
+
+      .flow-step::after {
+        content: ">";
+        position: absolute;
+        right: -10px;
+        top: 50%;
+        color: var(--blue);
+        font-size: 20px;
+        transform: translateY(-50%);
+      }
+
+      .flow-step:last-child::after {
+        display: none;
+      }
+
+      .metric {
+        border-left: 4px solid var(--green);
+        background: #fff;
+        border-radius: 8px;
+        padding: 16px;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 15px;
+        margin-bottom: 6px;
+      }
+
+      .metric span {
+        color: var(--muted);
+        display: block;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      @keyframes pulse {
+        0% {
+          opacity: 0.85;
+          transform: scale(0.45);
+        }
+        100% {
+          opacity: 0;
+          transform: scale(1.35);
+        }
+      }
+
+      @keyframes breathe {
+        0%, 100% {
+          transform: scale(0.92);
+        }
+        50% {
+          transform: scale(1.08);
+        }
+      }
+
+      @keyframes lift {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding: 18px;
+        }
+
+        main {
+          grid-template-columns: 1fr;
+        }
+
+        .diagram,
+        .flow,
+        .project-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .node::after,
+        .flow-step::after {
+          display: none;
+        }
+
+        .hero,
+        .status,
+        .architecture,
+        .project {
+          padding: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <main>
+        <section class="hero" aria-label="Application overview">
+          <div class="signal" aria-hidden="true">
+            <div class="core"></div>
+          </div>
+          <p class="eyebrow">{{ info.service }}</p>
+          <h1>{{ info.project }}</h1>
+          <p class="subtitle">
+            A real Flask microservice packaged with Docker, deployed with Helm, and designed for Kubernetes on AWS EKS. It exposes health and readiness checks so the platform can verify the app is alive before routing traffic.
+          </p>
+          <div class="pipeline" aria-label="Deployment flow">
+            <span class="step">Flask API</span>
+            <span class="step">Docker Image</span>
+            <span class="step">Helm Release</span>
+            <span class="step">EKS Service</span>
+          </div>
+        </section>
+
+        <aside class="status" aria-label="Runtime status">
+          <div>
+            <div class="badge">Live application page</div>
+          </div>
+
+          <dl>
+            <div class="row">
+              <dt>Environment</dt>
+              <dd>{{ info.environment }}</dd>
+            </div>
+            <div class="row">
+              <dt>Version</dt>
+              <dd>{{ info.version }}</dd>
+            </div>
+            <div class="row">
+              <dt>Image Tag</dt>
+              <dd>{{ info.release.image_tag }}</dd>
+            </div>
+            <div class="row">
+              <dt>Cluster</dt>
+              <dd>{{ info.release.cluster_name }}</dd>
+            </div>
+            <div class="row">
+              <dt>AWS Region</dt>
+              <dd>{{ info.release.aws_region }}</dd>
+            </div>
+            <div class="row">
+              <dt>Host</dt>
+              <dd>{{ info.hostname }}</dd>
+            </div>
+            <div class="row">
+              <dt>Checked At</dt>
+              <dd>{{ info.timestamp }}</dd>
+            </div>
+          </dl>
+
+          <nav class="links" aria-label="Service endpoints">
+            <a href="/api/info">API Info</a>
+            <a href="/health">Health</a>
+            <a href="/ready">Ready</a>
+            <a href="/status">Status</a>
+            <a href="/users/demo">Users</a>
+            <a href="/version">Version</a>
+          </nav>
+        </aside>
+      </main>
+
+      <section class="architecture" aria-label="Project architecture">
+        <h2>Project Architecture</h2>
+        <p class="section-copy">
+          This repository carries the complete cloud-native path: infrastructure as code, image packaging, registry publishing, Kubernetes release management, and public traffic through an AWS load balancer.
+        </p>
+        <div class="diagram">
+          <div class="node">
+            <strong>Terraform</strong>
+            <span>Creates VPC networking, EKS, ECR, IAM roles, IRSA wiring, and supporting AWS resources.</span>
+          </div>
+          <div class="node">
+            <strong>Docker and ECR</strong>
+            <span>Builds this Flask service into an image and stores the deployable artifact in Amazon ECR.</span>
+          </div>
+          <div class="node">
+            <strong>Helm on EKS</strong>
+            <span>Runs replicated pods, injects environment values, and configures health and readiness probes.</span>
+          </div>
+          <div class="node">
+            <strong>ALB Ingress</strong>
+            <span>Routes live HTTP traffic through the AWS Load Balancer Controller to the Kubernetes service.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="architecture" aria-label="Request flow">
+        <h2>Live Request Flow</h2>
+        <p class="section-copy">
+          In AWS, a browser request enters through the public load balancer, passes through Kubernetes routing, and lands on a running Flask pod.
+        </p>
+        <div class="flow">
+          {% for step in info.request_flow %}
+          <div class="flow-step">{{ step }}</div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="project" aria-label="Project details">
+        <h2>What This Demonstrates</h2>
+        <p class="section-copy">
+          When the app is deployed, this page acts as a visual smoke test for the running service and a quick explanation of the delivery system behind it.
+        </p>
+        <div class="project-grid">
+          <div class="metric">
+            <strong>Operational checks</strong>
+            <span>The `/health` and `/ready` endpoints support Kubernetes probes and load balancer health checks.</span>
+          </div>
+          <div class="metric">
+            <strong>Release metadata</strong>
+            <span>The environment, version, hostname, and timestamp show which app instance served the request.</span>
+          </div>
+          <div class="metric">
+            <strong>CI/CD friendly</strong>
+            <span>Tests, Docker build, Helm chart, and Terraform validation can all be wired into automated checks.</span>
+          </div>
+          <div class="metric">
+            <strong>Demo business endpoint</strong>
+            <span>The `/users/demo` API returns sample user records so the service behaves like a small real microservice.</span>
+          </div>
+          <div class="metric">
+            <strong>Structured request logs</strong>
+            <span>Every request emits method, path, status code, duration, service, and environment fields.</span>
+          </div>
+          <div class="metric">
+            <strong>Deployment metadata</strong>
+            <span>Image tag, Git commit, build date, cluster, and region can be injected by Helm and CI/CD.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

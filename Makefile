@@ -19,7 +19,7 @@ ECR_REGISTRY := $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
 IMAGE_REPOSITORY := $(ECR_REGISTRY)/$(ECR_REPOSITORY)
 IMAGE_URI := $(IMAGE_REPOSITORY):$(IMAGE_TAG)
 
-.PHONY: build push deploy require-aws-account
+.PHONY: build push deploy install-lbc preflight status url require-aws-account
 
 require-aws-account:
 	@test -n "$(AWS_ACCOUNT_ID)" || (echo "AWS_ACCOUNT_ID is required. Set it in .env or export it first." >&2; exit 1)
@@ -33,3 +33,15 @@ push: require-aws-account
 
 deploy:
 	./scripts/deploy.sh
+
+install-lbc:
+	./scripts/install-load-balancer-controller.sh
+
+preflight:
+	./scripts/preflight.sh
+
+status:
+	kubectl get pods,svc,ingress -n $(HELM_NAMESPACE)
+
+url:
+	kubectl get ingress $(HELM_RELEASE)-$(SERVICE_NAME) -n $(HELM_NAMESPACE) -o jsonpath='{.status.loadBalancer.ingress[0].hostname}{"\n"}'

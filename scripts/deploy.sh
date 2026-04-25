@@ -24,6 +24,8 @@ DOCKER_CONTEXT="${DOCKER_CONTEXT:-${ROOT_DIR}/microservices/user-service}"
 DOCKER_PLATFORM="${DOCKER_PLATFORM:-linux/amd64}"
 ENVIRONMENT="${ENVIRONMENT:-dev}"
 INGRESS_HOST="${INGRESS_HOST:-}"
+GIT_COMMIT="${GIT_COMMIT:-$(git -C "${ROOT_DIR}" rev-parse --short HEAD 2>/dev/null || echo local)}"
+BUILD_DATE="${BUILD_DATE:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
 
 if [[ -z "${AWS_ACCOUNT_ID}" ]]; then
   echo "AWS_ACCOUNT_ID is required. Set it in .env or export it before running deploy." >&2
@@ -55,6 +57,11 @@ helm_args=(
   --set "image.tag=${IMAGE_TAG}"
   --set "env.ENVIRONMENT=${ENVIRONMENT}"
   --set "env.VERSION=${IMAGE_TAG}"
+  --set "env.IMAGE_TAG=${IMAGE_TAG}"
+  --set "env.GIT_COMMIT=${GIT_COMMIT}"
+  --set "env.BUILD_DATE=${BUILD_DATE}"
+  --set "env.AWS_REGION=${AWS_REGION}"
+  --set "env.CLUSTER_NAME=${CLUSTER_NAME}"
   --atomic
   --wait
   --timeout 10m
@@ -68,3 +75,24 @@ echo "Deploying ${HELM_RELEASE} to namespace ${HELM_NAMESPACE}"
 helm "${helm_args[@]}"
 
 echo "Deployed ${IMAGE_URI}"
+
+echo "Waiting for ingress address"
+alb_dns=""
+for _ in {1..60}; do
+  alb_dns="$(kubectl get ingress "${HELM_RELEASE}-${SERVICE_NAME}" \
+    --namespace "${HELM_NAMESPACE}" \
+    --output jsonpath='{.status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)"
+
+  if [[ -n "${alb_dns}" ]]; then
+    break
+  fi
+
+  sleep 5
+done
+
+if [[ -n "${alb_dns}" ]]; then
+  echo "App URL: http://${alb_dns}/"
+  echo "Health:  http://${alb_dns}/health"
+else
+  echo "Ingress address is not ready yet. Check with: kubectl get ingress -n ${HELM_NAMESPACE}" >&2
+fi

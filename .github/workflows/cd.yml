@@ -41,6 +41,7 @@ jobs:
 
       - name: Deploy user-service
         run: |
+          BUILD_DATE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           helm upgrade --install user-service ./helm/user-service \
             --namespace default \
             --create-namespace \
@@ -48,6 +49,11 @@ jobs:
             --set image.tag="${{ github.event.inputs.image_tag }}" \
             --set env.ENVIRONMENT="${{ github.event.inputs.environment }}" \
             --set env.VERSION="${{ github.event.inputs.image_tag }}" \
+            --set env.IMAGE_TAG="${{ github.event.inputs.image_tag }}" \
+            --set env.GIT_COMMIT="${{ github.sha }}" \
+            --set env.BUILD_DATE="$BUILD_DATE" \
+            --set env.AWS_REGION="$AWS_REGION" \
+            --set env.CLUSTER_NAME="$CLUSTER_NAME" \
             --atomic \
             --wait \
             --timeout 10m
