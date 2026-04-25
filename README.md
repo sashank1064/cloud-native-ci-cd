@@ -43,29 +43,35 @@ When running locally or through the ALB, the root page shows the project name, s
 ## Architecture
 
 ```mermaid
-flowchart LR
-    Dev[local or CI] --> Build[docker build]
-    Build --> ECR[ECR]
+flowchart TB
+    Repo[GitHub repo] --> CI[GitHub Actions CI]
+    CI --> Tests[pytest]
+    CI --> TFCheck[terraform fmt and validate]
+    CI --> HelmLint[helm lint]
+    CI --> DockerCheck[docker build check]
 
-    Dev --> TF[terraform apply]
-    TF --> VPC[VPC]
-    TF --> EKS[EKS]
-    TF --> IAM[IAM]
-    TF --> IRSA[OIDC and IRSA]
-    TF --> Alerts[CloudWatch/SNS]
+    Dev[engineer] --> Build[docker build and push]
+    Build --> ECR[Amazon ECR]
+    Dev --> TFApply[terraform apply]
+    Dev --> HelmUp[helm upgrade install]
+    ECR --> HelmUp
 
-    ECR --> Helm[helm upgrade]
+    TFApply --> VPC[VPC]
+    TFApply --> EKS[EKS cluster]
+    TFApply --> IRSA[IAM and IRSA]
+    TFApply --> Alerts[CloudWatch and SNS]
+
     IRSA --> LBC[AWS Load Balancer Controller]
-    Helm --> Pods[user-service pods]
-    Pods --> Svc[ClusterIP Service]
-    Svc --> Ing[ALB Ingress]
-    LBC --> Ing
-    Ing --> ALB[ALB]
-    ALB --> Users[users]
+    HelmUp --> Pods[user-service pods]
+    HelmUp --> Ing[Ingress resource]
+    Ing --> LBC
+    LBC --> ALB[Application Load Balancer]
 
     VPC --> EKS
-    IAM --> EKS
     EKS --> Pods
+    Users[users] --> ALB
+    ALB --> Pods
+    Alerts -.alerts.-> Dev
 ```
 
 ## Live Request Flow
